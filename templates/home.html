@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Accueil - Steps into Space</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Steps into Space - Gestion des membres</h1>
+        <a href="{{ url_for('logout') }}">Déconnexion</a>
+        
+        <!-- Formulaire pour ajouter un membre -->
+        <h2>Ajouter un membre</h2>
+        <form method="POST" action="{{ url_for('add_member') }}">
+            <input type="text" name="full_name" placeholder="Nom complet" required>
+            <input type="date" name="birth_date" required>
+            <input type="text" name="city" placeholder="Ville" required>
+            <input type="date" name="join_date" required>
+            <button type="submit">Ajouter</button>
+        </form>
+        
+        <!-- Filtres -->
+        <h2>Filtres</h2>
+        <form method="GET">
+            <input type="text" name="year" placeholder="Année" value="{{ year }}">
+            <input type="text" name="month" placeholder="Mois" value="{{ month }}">
+            <input type="text" name="city" placeholder="Ville" value="{{ city }}">
+            <button type="submit">Filtrer</button>
+        </form>
+        
+        <!-- Tableau des membres -->
+        <h2>Liste des membres</h2>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom complet</th>
+                    <th>Date de naissance</th>
+                    <th>Ville</th>
+                    <th>Date d'inscription</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr>
+                    <td>{{ member.full_name }}</td>
+                    <td>{{ member.birth_date }}</td>
+                    <td>{{ member.city }}</td>
+                    <td>{{ member.join_date }}</td>
+                    <td>
+                        <!-- Formulaire pour modifier -->
+                        <form method="POST" action="{{ url_for('update_member', id=member.id) }}" style="display:inline;">
+                            <input type="text" name="full_name" value="{{ member.full_name }}" required>
+                            <input type="date" name="birth_date" value="{{ member.birth_date }}" required>
+                            <input type="text" name="city" value="{{ member.city }}" required>
+                            <input type="date" name="join_date" value="{{ member.join_date }}" required>
+                            <button type="submit">Modifier</button>
+                        </form>
+                        <a href="{{ url_for('delete_member', id=member.id) }}">Supprimer</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
