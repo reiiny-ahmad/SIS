@@ -31,19 +31,35 @@ def home():
     members = members_ref.stream()
     members_list = [{"id": doc.id, **doc.to_dict()} for doc in members]
     
-    # Filtres
-    year = request.args.get("year", "")
-    month = request.args.get("month", "")
-    city = request.args.get("city", "")
+    # Récupérer les paramètres de filtre
+    year = request.args.get("year", "").strip()
+    month = request.args.get("month", "").strip()
+    city = request.args.get("city", "").strip().lower()
+    print(f"Filters: year={year}, month={month}, city={city}")  # Debug
+    
+    # Appliquer les filtres
+    filtered_members = members_list.copy()
     
     if year:
-        members_list = [m for m in members_list if year in m.get("join_date", "")]
-    if month:
-        members_list = [m for m in members_list if month in m.get("join_date", "")]
-    if city:
-        members_list = [m for m in members_list if city.lower() in m.get("city", "").lower()]
+        try:
+            filtered_members = [m for m in filtered_members if datetime.fromisoformat(m.get("join_date", "")).year == int(year)]
+        except (ValueError, TypeError):
+            flash("Année invalide. Utilisez un format numérique (ex: 2025).")
     
-    return render_template("home.html", members=members_list, year=year, month=month, city=city)
+    if month:
+        try:
+            filtered_members = [m for m in filtered_members if datetime.fromisoformat(m.get("join_date", "")).month == int(month)]
+        except (ValueError, TypeError):
+            flash("Mois invalide. Utilisez un numéro de 1 à 12.")
+    
+    if city:
+        filtered_members = [m for m in filtered_members if city in m.get("city", "").lower()]
+    
+    if not filtered_members and (year or month or city):
+        flash("Aucun membre trouvé avec les filtres appliqués.")
+    
+    print(f"Filtered members count: {len(filtered_members)}")  # Debug
+    return render_template("home.html", members=filtered_members, year=year, month=month, city=city)
 
 # Ajouter un membre
 @app.route("/add_member", methods=["POST"])
@@ -76,7 +92,7 @@ def update_member(id):
         "join_date": request.form["join_date"],
         "updated_at": datetime.now().isoformat()
     }
-    db.collection("members").document(id).set(data)
+    db.collection("members").document(id).set(data, merge=True)  # Utilise merge pour ne pas écraser created_at
     flash("Membre modifié avec succès")
     return redirect(url_for("home"))
 

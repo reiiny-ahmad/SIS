@@ -4,72 +4,181 @@
     <meta charset="UTF-8">
     <title>Accueil - Steps into Space</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
+
+    
+    <video autoplay muted loop playsinline>
+        <source src="{{ url_for('static', filename='videos/background.mp4') }}" type="video/mp4">
+        <!-- Fallback image if video doesn't load -->
+        <img src="{{ url_for('static', filename='images/main.jpg') }}" alt="Background Fallback">
+    </video>
+
+
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-logo">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Steps into Space Logo">
+                <span>Steps into Space</span>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout">Déconnexion</a>
+        </div>
+    </nav>
+
     <div class="container">
-        <h1>Steps into Space - Gestion des membres</h1>
-        <a href="{{ url_for('logout') }}">Déconnexion</a>
+        <h1>Steps into Space - Gestion des inscriptions
         
         <!-- Formulaire pour ajouter un membre -->
         <h2>Ajouter un membre</h2>
         <form method="POST" action="{{ url_for('add_member') }}">
-            <input type="text" name="full_name" placeholder="Nom complet" required>
-            <input type="date" name="birth_date" required>
-            <input type="text" name="city" placeholder="Ville" required>
-            <input type="date" name="join_date" required>
+            <label for="full_name">Nom complet :</label>
+            <input type="text" id="full_name" name="full_name" placeholder="Nom complet" required>
+            <label for="birth_date">Date de naissance :</label>
+            <input type="date" id="birth_date" name="birth_date" required>
+            <label for="join_date">Date d'inscription :</label>
+            <input type="date" id="join_date" name="join_date" required>
+            <label for="join_date">Ville de residence :</label>
+            <select name="city" id="city" required>
+                <option value="">Sélectionner une ville</option>
+                <option value="Agadir">Agadir</option>
+                <option value="Casablanca">Casablanca</option>
+                <option value="Fès">Fès</option>
+                <option value="Marrakech">Marrakech</option>
+                <option value="Rabat">Rabat</option>
+                <option value="Tanger">Tanger</option>
+                <option value="Autre">Autre</option>
+            </select>
+            <div id="otherCity" style="display: none;">
+                <label for="custom_city">Nom de la ville :</label>
+                <input type="text" id="custom_city" name="custom_city" placeholder="Entrer une ville">
+            </div>
             <button type="submit">Ajouter</button>
         </form>
-        
+        <br>
+        <br>
+        <h2>Liste des membres</h2>
         <!-- Filtres -->
-        <h2>Filtres</h2>
-        <form method="GET">
+        <div class="filters">
             <input type="text" name="year" placeholder="Année" value="{{ year }}">
             <input type="text" name="month" placeholder="Mois" value="{{ month }}">
             <input type="text" name="city" placeholder="Ville" value="{{ city }}">
-            <button type="submit">Filtrer</button>
-        </form>
+            <button type="submit" formaction="{{ url_for('home') }}">Filtrer</button>
+        </div>
         
         <!-- Tableau des membres -->
-        <h2>Liste des membres</h2>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="alert">
-                    {{ messages[0] }}
+        
+        <table id="membersTable">
+    <thead>
+        <tr>
+            <th>Nom complet</th>
+            <th>Date de naissance</th>
+            <th>Date d'inscription</th>
+            <th>Ville</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for member in members %}
+        <tr>
+            <td data-label="Nom complet">{{ member.full_name }}</td>
+            <td data-label="Date de naissance">{{ member.birth_date }}</td>
+            <td data-label="Date d'inscription">{{ member.join_date }}</td>
+            <td data-label="Ville">{{ member.city }}</td>
+            <td data-label="Actions">
+                <button class="action-btn edit-btn" onclick="showPopup('{{ member.id }}', '{{ member.full_name }}', '{{ member.birth_date }}', '{{ member.city }}', '{{ member.join_date }}')">Modifier</button>
+                <button class="action-btn delete-btn" onclick="confirmDelete('{{ member.id }}')">Supprimer</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+        <!-- Popup for Editing -->
+        <div id="popup" class="popup">
+            <div class="popup-content">
+                <input type="hidden" id="popup-id">
+                <label for="popup-full_name">Nom complet :</label>
+                <input type="text" id="popup-full_name" required>
+                <label for="popup-birth_date">Date de naissance :</label>
+                <input type="date" id="popup-birth_date" required>
+                <label for="popup-city">Ville :</label>
+                <input type="text" id="popup-city" required>
+                <label for="popup-join_date">Date d'inscription :</label>
+                <input type="date" id="popup-join_date" required>
+                <div>
+                    <button onclick="confirmEdit()">Confirmer</button>
+                    <button onclick="hidePopup()">Annuler</button>
                 </div>
-            {% endif %}
-        {% endwith %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Nom complet</th>
-                    <th>Date de naissance</th>
-                    <th>Ville</th>
-                    <th>Date d'inscription</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for member in members %}
-                <tr>
-                    <td>{{ member.full_name }}</td>
-                    <td>{{ member.birth_date }}</td>
-                    <td>{{ member.city }}</td>
-                    <td>{{ member.join_date }}</td>
-                    <td>
-                        <!-- Formulaire pour modifier -->
-                        <form method="POST" action="{{ url_for('update_member', id=member.id) }}" style="display:inline;">
-                            <input type="text" name="full_name" value="{{ member.full_name }}" required>
-                            <input type="date" name="birth_date" value="{{ member.birth_date }}" required>
-                            <input type="text" name="city" value="{{ member.city }}" required>
-                            <input type="date" name="join_date" value="{{ member.join_date }}" required>
-                            <button type="submit">Modifier</button>
-                        </form>
-                        <a href="{{ url_for('delete_member', id=member.id) }}">Supprimer</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            </div>
+        </div>
+        <div id="overlay" class="overlay" onclick="hidePopup()"></div>
     </div>
+
+    <script>
+        function exportToExcel() {
+            const table = document.getElementById('membersTable');
+            const wb = XLSX.utils.table_to_book(table, {sheet: "Members"});
+            XLSX.write_file(wb, 'members.xlsx');
+        }
+
+        function showPopup(id, full_name, birth_date, city, join_date) {
+            document.getElementById('popup-id').value = id;
+            document.getElementById('popup-full_name').value = full_name;
+            document.getElementById('popup-birth_date').value = birth_date;
+            document.getElementById('popup-city').value = city;
+            document.getElementById('popup-join_date').value = join_date;
+            document.getElementById('popup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function hidePopup() {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function confirmEdit() {
+            const id = document.getElementById('popup-id').value;
+            const full_name = document.getElementById('popup-full_name').value;
+            const birth_date = document.getElementById('popup-birth_date').value;
+            const city = document.getElementById('popup-city').value;
+            const join_date = document.getElementById('popup-join_date').value;
+            fetch(`/update_member/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `full_name=${encodeURIComponent(full_name)}&birth_date=${encodeURIComponent(birth_date)}&city=${encodeURIComponent(city)}&join_date=${encodeURIComponent(join_date)}`
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+            hidePopup();
+        }
+
+        function confirmDelete(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce membre ?')) {
+                fetch(`/delete_member/${id}`, { method: 'GET' })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        }
+                    });
+            }
+        }
+
+        // Dynamic city input
+        document.getElementById('city').addEventListener('change', function() {
+            const otherCity = document.getElementById('otherCity');
+            if (this.value === 'Autre') {
+                otherCity.style.display = 'block';
+                document.getElementById('custom_city').setAttribute('name', 'city');
+                document.getElementById('city').removeAttribute('name');
+            } else {
+                otherCity.style.display = 'none';
+                document.getElementById('city').setAttribute('name', 'city');
+                document.getElementById('custom_city').removeAttribute('name');
+            }
+        });
+    </script>
 </body>
 </html>
