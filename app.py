@@ -13,18 +13,55 @@ def is_valid_date(date_str):
         return False
 
 # Page de connexion
+# @app.route("/", methods=["GET", "POST"])
+# def login():
+#     if request.method == "POST":
+#         email = request.form["username"]
+#         password = request.form["password"]
+#         try:
+#             user = auth.sign_in_with_email_and_password(email, password)
+#             session["user"] = user['localId']
+#             return redirect(url_for("home"))
+#         except Exception as e:
+#             flash(f"Identifiants incorrects: {str(e)}")
+#             return redirect(url_for("login"))
+#     return render_template("login.html")
 @app.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form["username"]
-        password = request.form["password"]
-        try:
-            user = auth.sign_in_with_email_and_password(email, password)
-            session["user"] = user['localId']
-            return redirect(url_for("home"))
-        except Exception as e:
-            flash(f"Identifiants incorrects: {str(e)}")
+        email = request.form.get("username")
+        password = request.form.get("password")
+        
+        if not email or not password:
+            flash("Please enter both email and password", 'error')
             return redirect(url_for("login"))
+
+        try:
+            # Add timeout to prevent hanging
+            user = auth.sign_in_with_email_and_password(email, password, timeout=10)
+            
+            # Verify email if required
+            user_info = auth.get_account_info(user['idToken'], timeout=10)
+            if not user_info['users'][0]['emailVerified']:
+                flash("Please verify your email first", 'error')
+                return redirect(url_for("login"))
+                
+            display_name = email.split('@')[0]
+            session["user"] = {
+                'uid': user['localId'],
+                'email': user_info['users'][0]['email'],
+                'display_name': display_name
+            }
+            return redirect(url_for("home"))
+            
+        except requests.exceptions.Timeout:
+            flash("Connection timeout, please try again", 'error')
+            return redirect(url_for("login"))
+        except Exception as e:
+            print(f"Login error: {str(e)}")  # Check your Render logs
+            flash("Invalid credentials or server error", 'error')
+            return redirect(url_for("login"))
+    
     return render_template("login.html")
 
 # Page d'accueil
