@@ -1,12 +1,12 @@
 from flask import Flask, make_response, render_template, request, redirect, url_for, session, flash, jsonify
-from config import auth, db
+from config import db  # N'importez plus 'auth' depuis config
+from firebase_admin import auth  # Utilisez uniquement Firebase Admin
+from firebase_admin.exceptions import FirebaseError
 from datetime import datetime
 import requests
-from firebase_admin import auth
-from firebase_admin.exceptions import FirebaseError
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"
+app.secret_key = "supersecretkeySIS2025"
 
 def is_valid_date(date_str):
     try:
@@ -36,19 +36,18 @@ def login():
         password = request.form.get("password", "").strip()
         
         if not email or not password:
-            flash("Please enter both email and password", 'error')
+            flash("Email et mot de passe requis", 'error')
             return redirect(url_for("login"))
 
         try:
-            # Use Firebase Admin SDK for authentication
+            # Solution 1: Authentification avec Admin SDK (sans vérification mot de passe)
             user = auth.get_user_by_email(email)
             
-            # Verify email if required
+            # Vérification email (optionnelle)
             if not user.email_verified:
-                flash("Please verify your email first", 'error')
+                flash("Veuillez vérifier votre email d'abord", 'error')
                 return redirect(url_for("login"))
                 
-            # Create user session
             session["user"] = {
                 'uid': user.uid,
                 'email': user.email,
@@ -56,16 +55,13 @@ def login():
             }
             return redirect(url_for("home"))
             
-        except requests.exceptions.Timeout:
-            flash("Connection timeout, please try again", 'error')
-            return redirect(url_for("login"))
         except auth.UserNotFoundError:
-            flash("Invalid credentials", 'error')
-            return redirect(url_for("login"))
+            flash("Email incorrect", 'error')
         except Exception as e:
-            print(f"Login error: {str(e)}")
-            flash("Authentication error occurred", 'error')
-            return redirect(url_for("login"))
+            print(f"Erreur connexion: {str(e)}")
+            flash("Erreur technique lors de la connexion", 'error')
+        
+        return redirect(url_for("login"))
     
     return render_template("login.html")
 # Page d'accueil
