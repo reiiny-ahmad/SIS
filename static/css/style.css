@@ -15,7 +15,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-family:cursive;
 }
 
 body {
@@ -334,4 +334,67 @@ tr:hover {
     th {
         display: none;
     }
+}
+.filters input {
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: border 0.3s;
+}
+
+.filters input:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+#membersTable tbody tr {
+    transition: all 0.3s;
+}
+
+
+
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.modern-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    max-width: 400px;
+    width: 90%;
+}
+
+.popup-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.confirm-btn, .cancel-btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.confirm-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+}
+
+.cancel-btn {
+    background-color: #ecf0f1;
+    border: 1px solid #bdc3c7;
 }
