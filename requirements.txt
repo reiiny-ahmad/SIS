@@ -8,3 +8,4 @@ requests
 google-auth
 google-cloud-firestore
 google-api-python-client
+setuptools
