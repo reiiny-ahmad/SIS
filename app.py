@@ -1,6 +1,9 @@
 from flask import Flask, make_response, render_template, request, redirect, url_for, session, flash, jsonify
 from config import auth, db
 from datetime import datetime
+import requests
+from firebase_admin import auth
+from firebase_admin.exceptions import FirebaseError
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -29,41 +32,42 @@ def is_valid_date(date_str):
 @app.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form.get("username")
-        password = request.form.get("password")
+        email = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
         
         if not email or not password:
             flash("Please enter both email and password", 'error')
             return redirect(url_for("login"))
 
         try:
-            # Add timeout to prevent hanging
-            user = auth.sign_in_with_email_and_password(email, password, timeout=10)
+            # Use Firebase Admin SDK for authentication
+            user = auth.get_user_by_email(email)
             
             # Verify email if required
-            user_info = auth.get_account_info(user['idToken'], timeout=10)
-            if not user_info['users'][0]['emailVerified']:
+            if not user.email_verified:
                 flash("Please verify your email first", 'error')
                 return redirect(url_for("login"))
                 
-            display_name = email.split('@')[0]
+            # Create user session
             session["user"] = {
-                'uid': user['localId'],
-                'email': user_info['users'][0]['email'],
-                'display_name': display_name
+                'uid': user.uid,
+                'email': user.email,
+                'display_name': user.email.split('@')[0]
             }
             return redirect(url_for("home"))
             
         except requests.exceptions.Timeout:
             flash("Connection timeout, please try again", 'error')
             return redirect(url_for("login"))
+        except auth.UserNotFoundError:
+            flash("Invalid credentials", 'error')
+            return redirect(url_for("login"))
         except Exception as e:
-            print(f"Login error: {str(e)}")  # Check your Render logs
-            flash("Invalid credentials or server error", 'error')
+            print(f"Login error: {str(e)}")
+            flash("Authentication error occurred", 'error')
             return redirect(url_for("login"))
     
     return render_template("login.html")
-
 # Page d'accueil
 @app.route("/home")
 def home():
