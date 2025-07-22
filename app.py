@@ -29,6 +29,14 @@ def is_valid_date(date_str):
 #             flash(f"Identifiants incorrects: {str(e)}")
 #             return redirect(url_for("login"))
 #     return render_template("login.html")
+
+from flask import Flask, redirect, render_template, request, session, flash, url_for
+from config import auth, db  # Maintenant les deux sont correctement exportés
+import requests
+
+app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-fallback-key')
+
 @app.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -36,6 +44,7 @@ def login():
         password = request.form.get("password", "").strip()
         
         try:
+            # Authentification avec Pyrebase
             user = auth.sign_in_with_email_and_password(email, password)
             user_info = auth.get_account_info(user['idToken'])
             
@@ -47,18 +56,22 @@ def login():
             return redirect(url_for("home"))
             
         except requests.exceptions.HTTPError as e:
-            error_msg = str(e)
-            if "INVALID_PASSWORD" in error_msg or "EMAIL_NOT_FOUND" in error_msg:
-                flash("Email ou mot de passe incorrect", 'error')
+            error_data = e.args[0].response.json()
+            if error_data['error']['message'] == 'INVALID_PASSWORD':
+                flash("Mot de passe incorrect", 'error')
+            elif error_data['error']['message'] == 'EMAIL_NOT_FOUND':
+                flash("Email non trouvé", 'error')
             else:
-                flash("Erreur de connexion", 'error')
+                flash(f"Erreur Firebase: {error_data['error']['message']}", 'error')
         except Exception as e:
-            print(f"Erreur: {e}")
-            flash("Erreur technique", 'error')
+            print(f"Erreur complète: {str(e)}")
+            flash("Erreur technique lors de la connexion", 'error')
         
         return redirect(url_for("login"))
     
     return render_template("login.html")
+
+
 # Page d'accueil
 @app.route("/home")
 def home():
