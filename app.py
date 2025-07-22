@@ -35,31 +35,26 @@ def login():
         email = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
         
-        if not email or not password:
-            flash("Email et mot de passe requis", 'error')
-            return redirect(url_for("login"))
-
         try:
-            # Solution 1: Authentification avec Admin SDK (sans vérification mot de passe)
-            user = auth.get_user_by_email(email)
+            user = auth.sign_in_with_email_and_password(email, password)
+            user_info = auth.get_account_info(user['idToken'])
             
-            # Vérification email (optionnelle)
-            if not user.email_verified:
-                flash("Veuillez vérifier votre email d'abord", 'error')
-                return redirect(url_for("login"))
-                
             session["user"] = {
-                'uid': user.uid,
-                'email': user.email,
-                'display_name': user.email.split('@')[0]
+                'uid': user['localId'],
+                'email': user_info['users'][0]['email'],
+                'display_name': email.split('@')[0]
             }
             return redirect(url_for("home"))
             
-        except auth.UserNotFoundError:
-            flash("Email incorrect", 'error')
+        except requests.exceptions.HTTPError as e:
+            error_msg = str(e)
+            if "INVALID_PASSWORD" in error_msg or "EMAIL_NOT_FOUND" in error_msg:
+                flash("Email ou mot de passe incorrect", 'error')
+            else:
+                flash("Erreur de connexion", 'error')
         except Exception as e:
-            print(f"Erreur connexion: {str(e)}")
-            flash("Erreur technique lors de la connexion", 'error')
+            print(f"Erreur: {e}")
+            flash("Erreur technique", 'error')
         
         return redirect(url_for("login"))
     
