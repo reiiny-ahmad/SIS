@@ -1,0 +1,10 @@
+Flask
+firebase-admin
+python-dotenv
+openpyxl
+gunicorn
+pyrebase4
+requests
+google-auth
+google-cloud-firestore
+google-api-python-client
