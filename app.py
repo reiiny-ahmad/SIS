@@ -4,6 +4,9 @@ from firebase_admin import auth  # Utilisez uniquement Firebase Admin
 from firebase_admin.exceptions import FirebaseError
 from datetime import datetime
 import requests
+import os
+from config import auth_pyrebase as auth, db  # Notez l'alias
+import logging
 
 app = Flask(__name__)
 app.secret_key = "supersecretkeySIS2025"
@@ -30,12 +33,6 @@ def is_valid_date(date_str):
 #             return redirect(url_for("login"))
 #     return render_template("login.html")
 
-from flask import Flask, redirect, render_template, request, session, flash, url_for
-from config import auth, db  # Maintenant les deux sont correctement exportés
-import requests
-
-app = Flask(__name__)
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-fallback-key')
 
 @app.route("/", methods=["GET", "POST"])
 def login():
@@ -44,33 +41,28 @@ def login():
         password = request.form.get("password", "").strip()
         
         try:
-            # Authentification avec Pyrebase
             user = auth.sign_in_with_email_and_password(email, password)
-            user_info = auth.get_account_info(user['idToken'])
-            
             session["user"] = {
                 'uid': user['localId'],
-                'email': user_info['users'][0]['email'],
-                'display_name': email.split('@')[0]
+                'email': user['email'],
+                'idToken': user['idToken']
             }
             return redirect(url_for("home"))
             
         except requests.exceptions.HTTPError as e:
-            error_data = e.args[0].response.json()
-            if error_data['error']['message'] == 'INVALID_PASSWORD':
+            error = e.args[0].response.json().get('error', {})
+            if error.get('message') == 'INVALID_PASSWORD':
                 flash("Mot de passe incorrect", 'error')
-            elif error_data['error']['message'] == 'EMAIL_NOT_FOUND':
-                flash("Email non trouvé", 'error')
             else:
-                flash(f"Erreur Firebase: {error_data['error']['message']}", 'error')
+                logger.error(f"Erreur Firebase: {error}")
+                flash("Erreur d'authentification", 'error')
         except Exception as e:
-            print(f"Erreur complète: {str(e)}")
-            flash("Erreur technique lors de la connexion", 'error')
+            logger.exception("Erreur inattendue")
+            flash("Erreur technique", 'error')
         
         return redirect(url_for("login"))
     
     return render_template("login.html")
-
 
 # Page d'accueil
 @app.route("/home")
