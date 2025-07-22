@@ -1,23 +1,30 @@
 import pyrebase
 import firebase_admin
 from firebase_admin import credentials, firestore
+import os
 
 # Configuration Pyrebase
 firebase_config = {
-    "apiKey": "AIzaSyBkt3AmdkaKfiM5SUFrKeQLUwosJq-Xupo",
-    "authDomain": "steps-into-space.firebaseapp.com",
-    "databaseURL": "https://steps-into-space.firebaseio.com",
-    "projectId": "steps-into-space",
-    "storageBucket": "steps-into-space.appspot.com",
-    "messagingSenderId": "554363529046",
-    "appId": "1:554363529046:web:a3f6e550c44746d20498f7"
+    "apiKey": os.getenv("FIREBASE_API_KEY"),
+    "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
+    "databaseURL": os.getenv("FIREBASE_DB_URL"),
+    "projectId": os.getenv("FIREBASE_PROJECT_ID"),
+    "storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET"),
+    "messagingSenderId": os.getenv("FIREBASE_SENDER_ID"),
+    "appId": os.getenv("FIREBASE_APP_ID")
 }
 
 # Initialisation Pyrebase
 firebase = pyrebase.initialize_app(firebase_config)
-auth = firebase.auth()
+auth_pyrebase = firebase.auth()  # Renommé pour éviter conflit
 
-# Initialisation Admin SDK (pour Firestore uniquement)
-cred = credentials.Certificate("steps-into-space-firebase-adminsdk.json")
+# Initialisation Admin SDK
+cred = credentials.Certificate({
+    "type": "service_account",
+    "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+    "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace('\\n', '\n'),
+    "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+    "token_uri": "https://oauth2.googleapis.com/token"
+})
 firebase_admin.initialize_app(cred)
-db = firestore.client()  # Ceci rend 'db' disponible pour l'importation
+db = firestore.client()
