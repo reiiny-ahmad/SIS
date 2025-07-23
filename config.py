@@ -14,7 +14,8 @@ firebase_config = {
     "projectId": "steps-into-space",
     "storageBucket": "steps-into-space.appspot.com",
     "messagingSenderId": "554363529046",
-    "appId": "1:554363529046:web:a3f6e550c44746d20498f7"
+    "appId": "1:554363529046:web:a3f6e550c44746d20498f7",
+    "databaseURL": "https://steps-into-space.firebaseio.com"  # Add this line
 }
 
 # Initialisation Pyrebase
