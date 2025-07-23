@@ -2,95 +2,10 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accueil - Steps into Space</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        .excel-export {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            background-color: #217346;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 1rem;
-        }
-        .excel-export:hover {
-            background-color: #1a5e38;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .excel-icon {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            background-color: white;
-            margin-right: 10px;
-            position: relative;
-            border-radius: 2px;
-        }
-        .excel-icon::before {
-            content: "X";
-            position: absolute;
-            color: #217346;
-            font-weight: bold;
-            font-size: 14px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        .modern-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            z-index: 1000;
-            max-width: 400px;
-            width: 90%;
-        }
-        .popup-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .confirm-btn {
-            background-color: #e74c3c;
-            color: white;
-            border: 1px solid #020202;            
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .cancel-btn {
-            background-color: #f9feff;
-            border: 1px solid #020202;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            color: #020202;
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        .success-btn {
-    background-color: #2ecc71;
-    color: white;
-    border: 1px solid #020202;            
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-    </style>
 </head>
 <body>
     <video autoplay muted loop playsinline>
@@ -113,28 +28,28 @@
         
         <h2>Ajouter un membre</h2>
         <form id="addMemberForm">
-    <label for="full_name">Nom complet :</label>
-    <input type="text" id="full_name" name="full_name" placeholder="Nom complet" required>
-    <label for="birth_date">Date de naissance :</label>
-    <input type="date" id="birth_date" name="birth_date" required>
-    <label for="join_date">Date d'inscription :</label>
-    <input type="date" id="join_date" name="join_date" required>
-    <label for="city">Ville de residence :</label>
-    <select name="city" id="city" required>
-        <option value="">Sélectionner une ville</option>
-<option value="Tétouan">Tétouan</option>
-<option value="Tinghir">Tinghir</option>
-<option value="Tiznit">Tiznit</option>
-<option value="Tanger">Tanger</option>
-<option value="Zagora">Zagora</option>
-<option value="Autre">Autre</option>
-    </select>
-    <div id="otherCity" style="display: none;">
-        <label for="custom_city">Nom de la ville :</label>
-        <input type="text" id="custom_city" name="custom_city" placeholder="Entrer une ville">
-    </div>
-    <button type="submit">Ajouter</button>
-</form>
+            <label for="full_name">Nom complet :</label>
+            <input type="text" id="full_name" name="full_name" placeholder="Nom complet" required>
+            <label for="birth_date">Date de naissance :</label>
+            <input type="date" id="birth_date" name="birth_date" required>
+            <label for="join_date">Date d'inscription :</label>
+            <input type="date" id="join_date" name="join_date" required>
+            <label for="city">Ville de residence :</label>
+            <select name="city" id="city" required>
+                <option value="">Sélectionner une ville</option>
+                <option value="Tétouan">Tétouan</option>
+                <option value="Tinghir">Tinghir</option>
+                <option value="Tiznit">Tiznit</option>
+                <option value="Tanger">Tanger</option>
+                <option value="Zagora">Zagora</option>
+                <option value="Autre">Autre</option>
+            </select>
+            <div id="otherCity" style="display: none;">
+                <label for="custom_city">Nom de la ville :</label>
+                <input type="text" id="custom_city" name="custom_city" placeholder="Entrer une ville">
+            </div>
+            <button type="submit">Ajouter</button>
+        </form>
 
         <h2>Liste des membres</h2>
         <div class="filters">
@@ -193,7 +108,6 @@
         </div>
         <div id="overlay" class="overlay" onclick="hidePopup()"></div>
     </div>
-
     <script>
         function exportToExcel() {
             const year = document.getElementById('yearFilter').value;
