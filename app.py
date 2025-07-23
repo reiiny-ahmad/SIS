@@ -1,12 +1,11 @@
 from flask import Flask, make_response, render_template, request, redirect, url_for, session, flash, jsonify
-from config import db  # N'importez plus 'auth' depuis config
 from firebase_admin import auth  # Utilisez uniquement Firebase Admin
 from firebase_admin.exceptions import FirebaseError
 from datetime import datetime
 import requests
 import os
-from config import auth_pyrebase as auth, db  # Notez l'alias
 import logging
+from config import auth, db
 
 app = Flask(__name__)
 app.secret_key = "supersecretkeySIS2025"
