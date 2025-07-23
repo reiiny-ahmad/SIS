@@ -7,6 +7,10 @@ import os
 import logging
 from config import auth, db
 
+
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.secret_key = "supersecretkeySIS2025"
 
@@ -53,16 +57,15 @@ def login():
             if error.get('message') == 'INVALID_PASSWORD':
                 flash("Mot de passe incorrect", 'error')
             else:
-                logger.error(f"Erreur Firebase: {error}")
+                logger.error(f"Erreur Firebase: {error}")  # Use the logger here
                 flash("Erreur d'authentification", 'error')
         except Exception as e:
-            logger.exception("Erreur inattendue")
+            logger.exception("Erreur inattendue")  # Use logger for exceptions
             flash("Erreur technique", 'error')
         
         return redirect(url_for("login"))
     
     return render_template("login.html")
-
 # Page d'accueil
 @app.route("/home")
 def home():
