@@ -44,7 +44,7 @@ video {
     height: 100%;
     object-fit: cover;
     z-index: -1;
-    opacity: 0.8; /* Adjust for visibility of content */
+    opacity: 0.8;
 }
 
 /* Barre de navigation */
@@ -57,7 +57,20 @@ video {
     top: 0;
     z-index: 1000;
 }
-
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background-color: rgba(77, 91, 158, 0.1);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--accent-color);
+    width: 100%; /* Ensure it takes full width on mobile */
+    max-width: 400px; /* Limit max width for better readability */
+    margin-left: auto;
+    margin-right: auto;
+}
 .navbar-content {
     display: flex;
     justify-content: space-between;
@@ -109,6 +122,10 @@ video {
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(10px);
+    min-height: calc(100vh - 4rem); /* Ensure it takes up the viewport height minus navbar */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 h1 {
@@ -156,7 +173,16 @@ input, select, button {
     font-size: 1rem;
     transition: all 0.3s ease;
 }
-
+input, button {
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid var(--accent-color);
+    background-color: rgba(26, 31, 59, 0.8);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    width: 100%; /* Full width inputs */
+}
 input:focus, select:focus {
     outline: none;
     border-color: var(--highlight-color);
@@ -352,7 +378,54 @@ tr:hover {
     transition: all 0.3s;
 }
 
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+        margin: 1rem;
+        width: 90%; /* More flexible width */
+    }
 
+    .login-form {
+        padding: 1rem;
+        max-width: 100%; /* Full width on very small screens */
+    }
+
+    input, button {
+        font-size: 0.9rem; /* Slightly smaller text for mobile */
+        padding: 0.5rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    video {
+        height: auto; /* Adjust video height for mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        margin: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    .login-form {
+        padding: 0.75rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.2rem;
+    }
+}
 
 
 @keyframes fadeOut {
