@@ -1,30 +1,34 @@
-import pyrebase
+# config.py
+import os
 import firebase_admin
 from firebase_admin import credentials, firestore
-import os
+import pyrebase
+from dotenv import load_dotenv
+
+load_dotenv()  # Pour le développement local
 
 # Configuration Pyrebase
 firebase_config = {
     "apiKey": os.getenv("FIREBASE_API_KEY"),
-    "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
-    "databaseURL": os.getenv("FIREBASE_DB_URL"),
-    "projectId": os.getenv("FIREBASE_PROJECT_ID"),
-    "storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET"),
-    "messagingSenderId": os.getenv("FIREBASE_SENDER_ID"),
-    "appId": os.getenv("FIREBASE_APP_ID")
+    "authDomain": "steps-into-space.firebaseapp.com",
+    "projectId": "steps-into-space",
+    "storageBucket": "steps-into-space.appspot.com",
+    "messagingSenderId": "554363529046",
+    "appId": "1:554363529046:web:a3f6e550c44746d20498f7"
 }
 
 # Initialisation Pyrebase
 firebase = pyrebase.initialize_app(firebase_config)
-auth_pyrebase = firebase.auth()  # Renommé pour éviter conflit
+auth = firebase.auth()
 
-# Initialisation Admin SDK
+# Configuration Admin SDK à partir des variables d'environnement
 cred = credentials.Certificate({
     "type": "service_account",
-    "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+    "project_id": "steps-into-space",
     "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace('\\n', '\n'),
-    "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+    "client_email": "firebase-adminsdk-fbsvc@steps-into-space.iam.gserviceaccount.com",
     "token_uri": "https://oauth2.googleapis.com/token"
 })
+
 firebase_admin.initialize_app(cred)
 db = firestore.client()
