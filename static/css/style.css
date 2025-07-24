@@ -43,7 +43,7 @@ video {
 
 /* Navbar */
 .navbar {
-    background: rgba(44, 62, 80, 0.9);
+    background: rgba(14,23, 52, 0.7);
     backdrop-filter: blur(10px);
     padding: 1rem 2rem;
     position: sticky;
